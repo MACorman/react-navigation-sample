@@ -1,4 +1,8 @@
 import React from 'react';
+import {
+  Button,
+  View
+} from 'react-native';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -6,6 +10,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import Feed from './src/tabs/Feed'
 import PostDetails from './src/stack/PostDetails'
+import Login from './src/stack/Login'
 import Profile from './src/tabs/Profile'
 import Notifications from './src/tabs/Notifications'
 import NewPost from './src/tabs/NewPost'
@@ -20,11 +25,25 @@ const Drawer = createDrawerNavigator()
 
 
 class App extends React.Component {
-  FeedScreen = () => {
+
+  state = {
+    loggedIn: false
+  }
+
+  login = () => {
+    this.setState({loggedIn: true})
+    
+  }
+
+  FeedScreen = ({navigation}) => {
     return (
       <Stack.Navigator>
-        <Stack.Screen name='Feed' component={Feed} />
-        <Stack.Screen name='Post Details' component={PostDetails} />
+        <Stack.Screen name='Feed' component={Feed} options={{headerLeft: null, headerRight: () => (
+          <Button title='Logout' onPress={() => this.setState({loggedIn: false})}/>
+        )}}/>
+        <Stack.Screen name='Post Details' component={PostDetails} options={{headerRight: () => (
+          <Button title='Logout' onPress={() => this.setState({loggedIn: false})}/>
+        )}}/>
       </Stack.Navigator>
     )
   }
@@ -41,14 +60,24 @@ class App extends React.Component {
 
   render() {
     return (
-      <NavigationContainer>
-        <Tabs.Navigator>
-          <Tabs.Screen name='Feed' children={this.FeedScreen} />
-          <Tabs.Screen name='Profile' children={this.ProfileScreen} />
-          <Tabs.Screen name='Notifications' component={Notifications} />
-          <Tabs.Screen name='New Post' component={NewPost} />
-        </Tabs.Navigator>
-      </NavigationContainer>
+      <>
+        {
+            this.state.loggedIn
+          ?
+            <NavigationContainer>
+              <Tabs.Navigator>
+                <Tabs.Screen name='Feed' children={this.FeedScreen} />
+                <Tabs.Screen name='Profile' children={this.ProfileScreen} />
+                <Tabs.Screen name='Notifications' component={Notifications} />
+                <Tabs.Screen name='New Post' component={NewPost} />
+              </Tabs.Navigator>
+            </NavigationContainer>
+          :
+          <View>
+            <Login login={this.login}/>
+          </View>
+        }
+      </>
     )
   }
 }
